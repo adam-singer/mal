@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library mal;
+library mal.step0_repl;
 
 import "dart:io";
 
@@ -12,12 +12,12 @@ String EVAL(String ast, String env) {
   return ast;
 }
 
-String PRINT(String exp) {
+void PRINT(String exp) {
   print(exp);
 }
 
 void rep(String str) {
-  return PRINT(EVAL(READ(str), ""));
+  PRINT(EVAL(READ(str), ""));
 }
 
 void main(List<String> args) {

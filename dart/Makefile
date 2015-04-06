@@ -8,7 +8,7 @@ SOURCES = $(SOURCES_BASE) $(SOURCES_LISP)
 all: dart_packages
 
 dart_packages:
-	@echo "Running (dart_packages)..."
+	pub install
 
 clean:
 	@echo "Running (clean)..."

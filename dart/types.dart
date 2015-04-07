@@ -44,3 +44,28 @@ class MalSymbol extends MalType {
   MalSymbol(this.symbol);
   String toString() => symbol.toString();
 }
+
+abstract class BinaryOperator extends MalType {
+  call(num a, num b);
+}
+
+class SumBinaryOperator extends BinaryOperator {
+  call(num a, num b) => new MalNumber(a + b);
+}
+
+class MinusBinaryOperator extends BinaryOperator {
+  call(num a, num b) => new MalNumber(a - b);
+}
+
+class MultiplyBinaryOperator extends BinaryOperator {
+  call(num a, num b) => new MalNumber(a * b);
+}
+
+class DivideBinaryOperator extends BinaryOperator {
+  call(num a, num b) => new MalNumber(a ~/ b);
+}
+
+SumBinaryOperator sumBinaryOperator = new SumBinaryOperator();
+MinusBinaryOperator minusBinaryOperator = new MinusBinaryOperator();
+MultiplyBinaryOperator multiplyBinaryOperator = new MultiplyBinaryOperator();
+DivideBinaryOperator divideBinaryOperator = new DivideBinaryOperator();

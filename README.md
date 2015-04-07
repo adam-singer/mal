@@ -12,6 +12,7 @@ Mal is implemented in 31 different languages:
 * C#
 * Clojure
 * CoffeeScript
+* Dart
 * Factor
 * Forth
 * Go

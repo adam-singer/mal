@@ -1,6 +1,8 @@
 library mal.types;
 
-class MalType {}
+abstract class MalType extends Function {
+  call() { throw new Error(); }
+}
 
 class MalList extends MalType {
   final List<MalType> malTypes;
@@ -45,27 +47,42 @@ class MalSymbol extends MalType {
   String toString() => symbol.toString();
 }
 
-abstract class BinaryOperator extends MalType {
-  call(num a, num b);
+typedef dynamic OnCall(List);
+
+abstract class VarargsFunction extends MalType {
+  OnCall _onCall;
+
+  VarargsFunction(this._onCall);
+
+  call() => _onCall([]);
+
+  noSuchMethod(Invocation invocation) {
+    final arguments = invocation.positionalArguments;
+    return _onCall(arguments);
+  }
 }
 
-class SumBinaryOperator extends BinaryOperator {
-  call(num a, num b) => new MalNumber(a + b);
+class SumBinaryOperator extends VarargsFunction  {
+  SumBinaryOperator(OnCall onCall): super(onCall);
 }
 
-class MinusBinaryOperator extends BinaryOperator {
-  call(num a, num b) => new MalNumber(a - b);
+class MinusBinaryOperator extends VarargsFunction {
+  MinusBinaryOperator(OnCall onCall): super(onCall);
 }
 
-class MultiplyBinaryOperator extends BinaryOperator {
-  call(num a, num b) => new MalNumber(a * b);
+class MultiplyBinaryOperator extends VarargsFunction {
+  MultiplyBinaryOperator(OnCall onCall): super(onCall);
 }
 
-class DivideBinaryOperator extends BinaryOperator {
-  call(num a, num b) => new MalNumber(a ~/ b);
+class DivideBinaryOperator extends VarargsFunction {
+  DivideBinaryOperator(OnCall onCall): super(onCall);
 }
 
-SumBinaryOperator sumBinaryOperator = new SumBinaryOperator();
-MinusBinaryOperator minusBinaryOperator = new MinusBinaryOperator();
-MultiplyBinaryOperator multiplyBinaryOperator = new MultiplyBinaryOperator();
-DivideBinaryOperator divideBinaryOperator = new DivideBinaryOperator();
+SumBinaryOperator sumBinaryOperator = new SumBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number + arguments[1].number));
+MinusBinaryOperator minusBinaryOperator = new MinusBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number - arguments[1].number));
+MultiplyBinaryOperator multiplyBinaryOperator = new MultiplyBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number * arguments[1].number));
+DivideBinaryOperator divideBinaryOperator = new DivideBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number ~/ arguments[1].number));

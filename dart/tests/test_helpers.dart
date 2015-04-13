@@ -11,6 +11,8 @@ void expectResults(TestEval testEval, String input, String expectedOutput, {isFa
     actualOutput = testEval(input).toString();
   } on StateError catch (se) {
     actualOutput = se.message;
+  } on StackOverflowError catch (so) {
+    actualOutput = so.toString();
   }
 
   if (expectedOutput == actualOutput) {

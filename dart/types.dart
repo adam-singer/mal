@@ -119,8 +119,11 @@ typedef dynamic OnCall(List);
 
 abstract class VarargsFunction extends MalType {
   OnCall _onCall;
+  var ast;
+  var env;
+  var fParams;
 
-  VarargsFunction(this._onCall);
+  VarargsFunction(this._onCall, {this.ast, this.env, this.fParams});
 
   call() => _onCall([]);
 
@@ -131,7 +134,7 @@ abstract class VarargsFunction extends MalType {
 }
 
 class MalFunction extends VarargsFunction {
-  MalFunction(OnCall onCall): super(onCall);
+  MalFunction(OnCall onCall, {ast: null, env: null, fParams: null}): super(onCall, ast: ast, env: env, fParams: fParams);
 }
 
 class SumBinaryOperator extends VarargsFunction  {

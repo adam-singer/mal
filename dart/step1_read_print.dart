@@ -16,7 +16,7 @@ MalType EVAL(MalType ast, String env) {
 }
 
 void PRINT(MalType exp) {
-  printer.pr_str(exp);
+  stdout.writeln(printer.pr_str(exp));
 }
 
 void rep(String str) {

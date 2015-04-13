@@ -141,8 +141,6 @@ MalType read_atom(Reader reader) {
     throw new StateError("unrecognized token '${token}'");
   }
 
-  bool parsed = true;
-
   String numPattern = r"""(^-?[0-9]+$)|(^-?[0-9][0-9.]*$)""";
   RegExp numRegex = new RegExp(numPattern);
 
@@ -155,9 +153,20 @@ MalType read_atom(Reader reader) {
   if (numRegex.hasMatch(token)) {
     return new MalNumber(num.parse(token));
   } else if (strRegex.hasMatch(token)) {
-    return new MalSymbol(token);
+    return new MalString(token);
   } else if (symRegex.hasMatch(token)) {
-    return new MalSymbol(token);
+
+    // TODO(adam): clean up the nested if/else logic.
+    if (token.startsWith(":")) {
+      return new MalKeyword(token);
+    }
+
+    switch(token.toLowerCase()) {
+      case "true": return MAL_TRUE;
+      case "false": return MAL_FALSE;
+      case "nil": return MAL_NIL;
+      default: return new MalSymbol(token);
+    }
   } else {
     throw new StateError("unrecognized token '${token}'");
   }

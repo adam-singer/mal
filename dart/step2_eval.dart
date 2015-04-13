@@ -11,22 +11,31 @@ MalType READ(String str) {
   return reader.read_str(str);
 }
 
-Map<String, MalType> repl_env = {
-    '+': sumBinaryOperator,
-    '-': minusBinaryOperator,
-    '*': multiplyBinaryOperator,
-    '/': divideBinaryOperator,
+SumBinaryOperator sumBinaryOperator = new SumBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number + arguments[1].number));
+MinusBinaryOperator minusBinaryOperator = new MinusBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number - arguments[1].number));
+MultiplyBinaryOperator multiplyBinaryOperator = new MultiplyBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number * arguments[1].number));
+DivideBinaryOperator divideBinaryOperator = new DivideBinaryOperator(
+        (arguments) => new MalNumber(arguments[0].number ~/ arguments[1].number));
+
+Map<MalSymbol, MalType> repl_env = {
+  new MalSymbol('+'): sumBinaryOperator,
+  new MalSymbol('-'): minusBinaryOperator,
+  new MalSymbol('*'): multiplyBinaryOperator,
+  new MalSymbol('/'): divideBinaryOperator
 };
 
-MalType eval_ast(MalType ast, Map<String, MalType> env) {
+MalType eval_ast(MalType ast, Map<MalSymbol, MalType> env) {
 
   if (ast is MalSymbol) {
 
-    if (!env.containsKey(ast.symbol)) {
-      throw new StateError("'${ast.symbol}' not found.");
+    if (!env.containsKey(ast)) {
+      throw new StateError("'${ast}' not found.");
     }
 
-    var binaryOperator = env[ast.symbol];
+    var binaryOperator = env[ast];
     return binaryOperator;
   } else if (ast is MalList) {
 
@@ -53,7 +62,7 @@ MalType eval_ast(MalType ast, Map<String, MalType> env) {
   }
 }
 
-MalType EVAL(MalType ast, Map<String, MalType> env) {
+MalType EVAL(MalType ast, Map<MalSymbol, MalType> env) {
 
   if (!(ast is MalList) || ast is MalVector) {
     return eval_ast(ast, env);
@@ -75,7 +84,7 @@ MalType EVAL(MalType ast, Map<String, MalType> env) {
 }
 
 void PRINT(MalType exp) {
-  printer.pr_str(exp);
+  stdout.writeln(printer.pr_str(exp));
 }
 
 void rep(String str) {

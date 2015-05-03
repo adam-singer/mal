@@ -159,7 +159,7 @@ Str str = new Str(
 // to true, joins the results with " ", prints the string to the
 // screen and then returns `nil`.
 Prn prn = new Prn((arguments) {
-  printer.pr_str(new MalString(arguments.map((m) => m.toString()).join(" ")));
+  print(printer.pr_str(new MalString(arguments.map((m) => m.toString(true)).join(" "))));
   return MAL_NIL;
 });
 

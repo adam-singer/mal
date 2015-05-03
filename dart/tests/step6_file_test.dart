@@ -8,6 +8,8 @@ Function testEval = (String input) => EVAL(READ(input), repl_env);
 void main() {
   init();
 
+  expectResults(testEval, '(eval (read-string (str "(do" (slurp "../../tests/incA.mal") ")")))', "nil", isFailing: false);
+
   expectResults(testEval, '7 ;; comment', '7');
   expectResults(testEval, '"7 ;; comment"', '7 ;; comment');
   expectResults(testEval, '(read-string "7 ;; comment")', '7');

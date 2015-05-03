@@ -88,7 +88,7 @@ MalType EVAL(MalType sourceAst, Env env) {
       // * `do`: Evaluate the all the elements of the list using `eval_ast`
       //   and return the final evaluated element.
         rest(MalList a) {
-          return new MalList.fromList(a.malTypes.getRange(1, a.malTypes.length).toList());
+          return new MalList.fromList(a.malTypes.getRange(1, a.malTypes.length - 1).toList());
         }
 
         eval_ast(rest(sourceAst), env) as MalList;

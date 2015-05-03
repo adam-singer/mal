@@ -25,7 +25,9 @@ MalType read_str(String str) {
   List<String> tokens = tokenizer(str);
 
   if (tokens.length == 0) {
-    return null;
+    // return null;
+    // TODO(adam): Should return MalType null or empty string
+    return new MalString("");
   }
 
   Reader reader = new Reader(tokens);
@@ -153,7 +155,12 @@ MalType read_atom(Reader reader) {
   if (numRegex.hasMatch(token)) {
     return new MalNumber(num.parse(token));
   } else if (strRegex.hasMatch(token)) {
-    return new MalString(token);
+    String str = token;
+    if (str[0] == '"' && str[str.length-1] == '"') {
+      str = str.substring(1,str.length-1);
+    }
+
+    return new MalString(str);
   } else if (symRegex.hasMatch(token)) {
 
     // TODO(adam): clean up the nested if/else logic.

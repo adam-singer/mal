@@ -14,6 +14,7 @@ void main() {
   testMalList();
   testMalVector();
   testMalHashMap();
+  testMalHashMapKeys();
   testMalNumber();
   testMalSymbol();
 }
@@ -45,8 +46,17 @@ void testMalVector() {
 
 void testMalHashMap() {
   MalHashMap malHashMap = new MalHashMap();
-  malHashMap.malHashMap["sym"] = malNumber10;
-  assert(malHashMap.toString() == "{sym ${malNumber10.toString()}}");
+  malHashMap.malHashMap[new MalKeyword(":sym")] = malNumber10;
+  assert(malHashMap.toString() == "{:sym ${malNumber10.toString()}}");
+}
+
+void testMalHashMapKeys() {
+  MalHashMap malHashMap = new MalHashMap();
+  malHashMap.malHashMap[new MalKeyword(":sym")] = malNumber10;
+  assert(malHashMap.toString() == "{:sym ${malNumber10.toString()}}");
+
+  malHashMap.malHashMap[new MalKeyword(":sym")] = malNumber1000;
+  assert(malHashMap.toString() == "{:sym ${malNumber1000.toString()}}");
 }
 
 void testMalNumber() {

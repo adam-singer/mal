@@ -6,6 +6,7 @@ import "step2_eval_test.dart" as step2;
 import "step3_env_test.dart" as step3;
 import "step4_if_fn_do_test.dart" as step4;
 import "step5_tco_test.dart" as step5;
+import "step6_file_test.dart" as step6;
 
 import "env_test.dart" as env;
 import "types_test.dart" as types;
@@ -18,6 +19,7 @@ void main() {
   step3.main();
   step4.main();
   step5.main();
+  step6.main();
 
   types.main();
   env.main();

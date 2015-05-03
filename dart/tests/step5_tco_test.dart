@@ -9,7 +9,7 @@ void main() {
   init();
 
   //;; Testing recursive tail-call function
-  expectResults(testEval, '(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))', '', isFailing: true); // Ignore output
+  expectResults(testEval, '(def! sum2 (fn* (n acc) (if (= n 0) acc (sum2 (- n 1) (+ n acc)))))', "MalFunction");
 
   expectResults(testEval, '(sum2 10 0)', '55');
 
@@ -18,7 +18,7 @@ void main() {
   expectResults(testEval, '(def! res2 (sum2 10000 0))', '50005000');
 
   //;; Test recursive non-tail call function
-  expectResults(testEval, '(def! sum-to (fn* (n) (if (= n 0) 0 (+ n (sum-to (- n 1))))))', '', isFailing: true); // Ignore output
+  expectResults(testEval, '(def! sum-to (fn* (n) (if (= n 0) 0 (+ n (sum-to (- n 1))))))', "MalFunction");
 
   expectResults(testEval, '(sum-to 10)', '55');
 

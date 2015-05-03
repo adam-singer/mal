@@ -24,11 +24,11 @@ void main() {
   expectResults(testEval, 'abc-def', 'abc-def');
 
   // Testing read of strings
-  expectResults(testEval, '"abc"', '"abc"');
-  expectResults(testEval, '   "abc"', '"abc"');
-  expectResults(testEval, '"abc (with parens)"', '"abc (with parens)"');
+  expectResults(testEval, '"abc"', 'abc');
+  expectResults(testEval, '   "abc"', 'abc');
+  expectResults(testEval, '"abc (with parens)"', 'abc (with parens)');
   expectResults(testEval, '"abc"def"', '"abc"def"', isFailing: true);
-  expectResults(testEval, '""', '""');
+  expectResults(testEval, '""', '');
 
   // Testing read of lists
   expectResults(testEval, '(+ 1 2)', '(+ 1 2)');

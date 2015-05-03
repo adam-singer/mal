@@ -2,34 +2,41 @@ library mal.types;
 
 abstract class MalType extends Function {
   call() { throw new Error(); }
+  @override
+  String toString([bool print_readable = false]) { return "MalType"; }
 }
 
 class MalList extends MalType {
   final List<MalType> malTypes;
   MalList(): malTypes = new List<MalType>();
   MalList.fromList(this.malTypes);
-  String toString() => "(${malTypes.join(' ')})";
+  @override
+  String toString([bool print_readable = false]) => "(${malTypes.join(' ')})";
 }
 
 // TODO(ADAM): do not inherit from mallist, treat them as two seprate types and then fix the type checks.
 class MalVector extends MalList {
-  String toString() => "[${malTypes.join(' ')}]";
+  @override
+  String toString([bool print_readable = false]) => "[${malTypes.join(' ')}]";
 }
 
 class MalHashMap extends MalType {
-  final Map<String, MalType> malHashMap;
-  MalHashMap(): malHashMap = new Map<String, MalType>();
-  MalHashMap.fromMalList(MalList malList): malHashMap = new Map<String, MalType>() {
+  final Map<Object, MalType> malHashMap;
+  MalHashMap(): malHashMap = new Map<Object, MalType>();
+  MalHashMap.fromMalList(MalList malList): malHashMap = new Map<Object, MalType>() {
     for (int i = 0; i < malList.malTypes.length; i+=2) {
       MalType key = malList.malTypes[i];
       MalType val = malList.malTypes[i+1];
-      malHashMap[key.toString()] = val;
+      // malHashMap[key.toString()] = val;
+      malHashMap[key] = val;
     }
   }
-  String toString() {
+
+  @override
+  String toString([bool print_readable = false]) {
     StringBuffer sb = new StringBuffer();
-    malHashMap.forEach((String k,MalType v) {
-      sb.write("$k ${v.toString()}");
+    malHashMap.forEach((Object k,MalType v) {
+      sb.write('${(k as MalType).toString(true)} ${v.toString()}');
     });
 
     return "{${sb.toString()}}";
@@ -39,13 +46,17 @@ class MalHashMap extends MalType {
 class MalNumber extends MalType {
   final num number;
   MalNumber(this.number);
-  String toString() => number.toString();
+
+  @override
+  String toString([bool print_readable = false]) => number.toString();
 }
 
 class MalSymbol extends MalType {
   final String symbol;
   MalSymbol(this.symbol);
-  String toString() => symbol.toString();
+
+  @override
+  String toString([bool print_readable = false]) => symbol.toString();
 
   @override
   bool operator ==(other) {
@@ -67,7 +78,7 @@ class MalKeyword extends MalType {
   MalKeyword(this.keyword);
 
   @override
-  String toString() => keyword.toString();
+  String toString([bool print_readable = false]) => keyword.toString();
 
   @override
   bool operator ==(other) {
@@ -89,13 +100,22 @@ final BIND_SYMBOL = new MalSymbol("&");
 class MalString extends MalType {
   final String string;
   MalString(this.string);
-  String toString() => string.toString();
+
+  @override
+  String toString([bool print_readable = false]) {
+
+    if (print_readable) {
+      return '"${string.toString()}"';
+    } else {
+      return string.toString();
+    }
+  }
 }
 
 class MalBoolean extends MalType {
   final bool value;
   MalBoolean(this.value);
-  String toString() => "${this.value}";
+  String toString([bool print_readable = false]) => "${this.value}";
 }
 
 class MalTrue extends MalBoolean {
@@ -108,7 +128,9 @@ class MalFalse extends MalBoolean {
 
 class MalNil extends MalFalse {
   MalNil(): super();
-  String toString() => "nil";
+
+  @override
+  String toString([bool print_readable = false]) => "nil";
 }
 
 final MAL_NIL = new MalNil();
@@ -131,6 +153,9 @@ abstract class VarargsFunction extends MalType {
     final arguments = invocation.positionalArguments;
     return _onCall(arguments);
   }
+
+  @override
+  String toString([bool print_readable = false]) => "MalFunction";
 }
 
 class MalFunction extends VarargsFunction {
@@ -203,4 +228,16 @@ class Prn extends VarargsFunction {
 
 class PrintLn extends VarargsFunction {
   PrintLn(OnCall onCall): super(onCall);
+}
+
+class ReadString extends VarargsFunction {
+  ReadString(OnCall onCall): super(onCall);
+}
+
+class Slurp extends VarargsFunction {
+  Slurp(OnCall onCall): super(onCall);
+}
+
+class Eval extends VarargsFunction  {
+  Eval(OnCall onCall): super(onCall);
 }

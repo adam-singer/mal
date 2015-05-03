@@ -2,6 +2,8 @@ library mal.core;
 
 import "types.dart";
 import "printer.dart" as printer;
+import "reader.dart" as reader;
+import "dart:io";
 
 SumBinaryOperator sumBinaryOperator = new SumBinaryOperator(
         (arguments) => new MalNumber(arguments[0].number + arguments[1].number));
@@ -144,32 +146,42 @@ Count count = new Count(
 // string.
 PrStr prStr = new PrStr(
         (arguments) {
-          return new MalString(arguments.map((m) => m.toString()).join(" "));
+          return new MalString(arguments.map((m) => m.toString(true)).join(" "));
         });
 
 // `str`: calls `pr_str` on each argument with `print_readably` set
 // to false, concatenates the results together ("" separator), and
 // returns the new string.
 Str str = new Str(
-        (arguments) => new MalString(arguments.map((m) => m.toString()).join("")));
+        (arguments) => new MalString(arguments.map((m) => m.toString(false)).join("")));
 
 // `prn`:  calls `pr_str` on each argument with `print_readably` set
 // to true, joins the results with " ", prints the string to the
 // screen and then returns `nil`.
-Prn prn = new Prn(
-        (arguments) {
-          printer.pr_str(new MalString(arguments.map((m) => m.toString()).join(" ")));
-          return MAL_NIL;
-        });
+Prn prn = new Prn((arguments) {
+  printer.pr_str(new MalString(arguments.map((m) => m.toString()).join(" ")));
+  return MAL_NIL;
+});
 
 // `println`:  calls `pr_str` on each argument with `print_readably` set
 // to false, joins the results with " ", prints the string to the
 // screen and then returns `nil`.
-PrintLn printLn = new PrintLn(
-        (arguments) {
-          arguments.map((m) => printer.pr_str(m.toString()));
-          return MAL_NIL;
-        });
+PrintLn printLn = new PrintLn((arguments) {
+  arguments.map((m) => printer.pr_str(m.toString()));
+  return MAL_NIL;
+});
+
+ReadString readString = new ReadString((arguments) {
+  String str = arguments[0].string;
+  return reader.read_str(str);
+});
+
+Slurp slurp = new Slurp((arguments) {
+  String str = arguments[0].string;
+  File file = new File(str);
+  String contents = file.readAsStringSync();
+  return new MalString(contents);
+});
 
 // core modules namespace
 Map<String, Object> ns = {
@@ -178,6 +190,9 @@ Map<String, Object> ns = {
     'str': str,
     'prn': prn,
     'println': printLn,
+
+    'read-string': readString,
+    'slurp': slurp,
 
     '<': lessThanBinaryOperator,
     '<=': lessThanEqualBinaryOperator,

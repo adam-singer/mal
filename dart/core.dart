@@ -183,6 +183,30 @@ Slurp slurp = new Slurp((arguments) {
   return new MalString(contents);
 });
 
+Cons cons = new Cons((arguments) {
+  MalList malList = new MalList();
+  malList.malTypes.add(arguments[0]);
+  malList.malTypes.addAll( (arguments[1] as MalList).malTypes );
+  return malList;
+});
+
+Concat concat = new Concat((arguments) {
+
+  MalList malList = new MalList();
+
+  if (arguments.length == 0) {
+    return malList;
+  }
+
+  malList.malTypes.addAll( (arguments[0] as MalList).malTypes );
+
+  for (int i = 1; i < arguments.length; i++) {
+    malList.malTypes.addAll( (arguments[i] as MalList).malTypes );
+  }
+
+  return malList;
+});
+
 // core modules namespace
 Map<String, Object> ns = {
     '=': isEqual,
@@ -206,6 +230,8 @@ Map<String, Object> ns = {
     'list': toList,
     'list?': isList,
 
+    'cons': cons,
+    'concat': concat,
     'empty?': isEmpty,
     'count': count
 };

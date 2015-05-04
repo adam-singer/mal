@@ -7,6 +7,7 @@ abstract class MalType extends Function {
 }
 
 class MalList extends MalType {
+  // TODO(adam): should create a varargs constructor for MalList and MalVector.
   final List<MalType> malTypes;
   MalList(): malTypes = new List<MalType>();
   MalList.fromList(this.malTypes);
@@ -240,4 +241,12 @@ class Slurp extends VarargsFunction {
 
 class Eval extends VarargsFunction  {
   Eval(OnCall onCall): super(onCall);
+}
+
+class Cons extends VarargsFunction {
+  Cons(OnCall onCall): super(onCall);
+}
+
+class Concat extends VarargsFunction {
+  Concat(OnCall onCall): super(onCall);
 }

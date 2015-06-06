@@ -9,6 +9,7 @@ import "step5_tco_test.dart" as step5;
 import "step6_file_test.dart" as step6;
 import "step7_quote_test.dart" as step7;
 import "step8_macros_test.dart" as step8;
+import "step9_try_test.dart" as step9;
 
 import "env_test.dart" as env;
 import "types_test.dart" as types;
@@ -24,6 +25,7 @@ void main() {
   step6.main();
   step7.main();
   step8.main();
+  step9.main();
 
   types.main();
   env.main();

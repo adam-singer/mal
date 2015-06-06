@@ -1,5 +1,6 @@
   // ;;;; ^([^;].*) to glob for input, replace with -> expectResults(testEval, '\1',
   // ;;;; ^;=>(.*) to glob for expected output, replace with -> '\1');
   // ;;;; 'ignore the first tick here...:  ^([^;].*',)\n -> \1
+  // ;;;; ^(;;.*) -> // \1
   // ;; -----------------------------------------------------
 

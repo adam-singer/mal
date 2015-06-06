@@ -186,7 +186,7 @@ Slurp slurp = new Slurp((arguments) {
 Cons cons = new Cons((arguments) {
   MalList malList = new MalList();
   malList.malTypes.add(arguments[0]);
-  malList.malTypes.addAll( (arguments[1] as MalList).malTypes );
+  malList.malTypes.addAll((arguments[1] as MalList).malTypes);
   return malList;
 });
 
@@ -205,6 +205,27 @@ Concat concat = new Concat((arguments) {
   }
 
   return malList;
+});
+
+Nth nth = new Nth((arguments) {
+  num index = (arguments[1] as MalNumber).number;
+  MalList list = (arguments[0] as MalList);
+
+  if (index < list.malTypes.length) {
+    return list.nth(index);
+  } else {
+    throw new StateError("nth: index out of range");
+  }
+});
+
+First first = new First((arguments) {
+  MalList list = (arguments[0] as MalList);
+  return list.malTypes.isNotEmpty ? list.nth(0) : MAL_NIL;
+});
+
+Rest rest = new Rest((arguments) {
+  MalList list = (arguments[0] as MalList);
+  return list.rest();
 });
 
 // core modules namespace
@@ -232,6 +253,11 @@ Map<String, Object> ns = {
 
     'cons': cons,
     'concat': concat,
+
+    'nth': nth,
+    'first': first,
+    'rest': rest,
+
     'empty?': isEmpty,
     'count': count
 };

@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library mal.step7_quote;
+library mal.step8_macros;
 
 import "dart:io";
 import "types.dart";
@@ -81,6 +81,30 @@ MalType eval_ast(MalType ast, Env env) {
   }
 }
 
+bool isMacroCall(MalType ast, Env env) {
+  if (ast is MalList) {
+    MalType argument0 = ast.nth(0);
+    if (argument0 is MalSymbol && env.find(argument0) != null) {
+      MalType macro = env.get(argument0);
+      if (macro is MalFunction && macro.macro) {
+        return true;
+      }
+    }
+
+  }
+  return false;
+}
+
+MalType macroExpand(MalType ast, Env env) {
+  while(isMacroCall(ast, env)) {
+    MalSymbol argument0 = ((ast as MalList).nth(0) as MalSymbol);
+    MalFunction macro = (env.get(argument0) as MalFunction);
+    ast = Function.apply(macro, (ast as MalList).rest().malTypes);
+  }
+
+  return ast;
+}
+
 MalType EVAL(MalType sourceAst, Env env) {
   var argument0, argument1, argument2, argument3;
 
@@ -88,6 +112,13 @@ MalType EVAL(MalType sourceAst, Env env) {
     if (!(sourceAst is MalList) || sourceAst is MalVector) {
       return eval_ast(sourceAst, env);
     }
+
+    MalType expanded = macroExpand(sourceAst, env);
+    if (!(expanded is MalList)) {
+      return expanded;
+    }
+
+    sourceAst = expanded;
 
     if ((sourceAst as MalList).malTypes.length == 0) {
       return sourceAst;
@@ -123,6 +154,16 @@ MalType EVAL(MalType sourceAst, Env env) {
       case 'quasiquote':
         sourceAst = quasiquote(ast.malTypes[1]);
         break;
+      case 'defmacro!':
+        argument1 = ast.nth(1);
+        argument2 = ast.nth(2);
+        var result = EVAL(argument2, env);
+        (result as MalFunction).setMacro();
+        env.set(argument1, result);
+        return result;
+      case 'macroexpand':
+        argument1 = ast.nth(1);
+        return macroExpand(argument1, env);
       case 'do':
       // 'do: return eval_ast(rest(ast), env)[-1]
       // * `do`: Evaluate the all the elements of the list using `eval_ast`
@@ -207,6 +248,8 @@ void init([List<String> args = const []]) {
   // Define global function in language
   rep("(def! not (fn* (a)(if a false true)))");
   rep('(def! load-file (fn* (f) (eval (read-string (str "(do" (slurp f) ")")))))');
+  rep("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
+  rep("(defmacro! or (fn* (& xs) (if (empty? xs) nil (if (= 1 (count xs)) (first xs) `(let* (or_FIXME ~(first xs)) (if or_FIXME or_FIXME (or ~@(rest xs))))))))");
 }
 
 void main(List<String> args) {
@@ -231,10 +274,8 @@ void main(List<String> args) {
       rep(line);
     } on Exception catch (ex) {
       stdout.writeln("Error: ${ex.toString()}");
-      break;
     } on StateError catch (ex) {
       stdout.writeln("Error: ${ex.message}");
-      break;
     } on StackOverflowError catch (ex) {
       stdout.writeln("Error: ${ex.toString()}");
       PRINT(MAL_NIL);

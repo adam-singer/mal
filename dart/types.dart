@@ -11,6 +11,34 @@ class MalList extends MalType {
   final List<MalType> malTypes;
   MalList(): malTypes = new List<MalType>();
   MalList.fromList(this.malTypes);
+  /**
+   * nth: this function takes a list (or vector) and a number (index) as arguments, returns the element of the
+   * list at the given index. If the index is out of range, this function raises an exception.
+   */
+  MalType nth(int index) {
+    if (index >= malTypes.length || index < 0) {
+      throw new StateError("nth cannot index into $index element of $malTypes");
+    }
+
+    return malTypes[index];
+  }
+
+  /**
+   * rest: this function takes a list (or vector) as its argument and returns a new list containing all the elements
+   * except the first.
+   */
+  MalList rest() {
+    if (malTypes.isEmpty) {
+      return new MalList();
+    }
+
+    return new MalList.fromList(malTypes.toList()..removeAt(0));
+  }
+
+  MalType first() {
+    return malTypes.first;
+  }
+
   @override
   String toString([bool print_readable = false]) => "(${malTypes.join(' ')})";
 }
@@ -145,6 +173,7 @@ abstract class VarargsFunction extends MalType {
   var ast;
   var env;
   var fParams;
+  var macro = false;
 
   VarargsFunction(this._onCall, {this.ast, this.env, this.fParams});
 
@@ -153,6 +182,10 @@ abstract class VarargsFunction extends MalType {
   noSuchMethod(Invocation invocation) {
     final arguments = invocation.positionalArguments;
     return _onCall(arguments);
+  }
+
+  void setMacro() {
+    macro = true;
   }
 
   @override
@@ -249,4 +282,16 @@ class Cons extends VarargsFunction {
 
 class Concat extends VarargsFunction {
   Concat(OnCall onCall): super(onCall);
+}
+
+class Nth extends VarargsFunction {
+  Nth(OnCall onCall): super(onCall);
+}
+
+class First extends VarargsFunction {
+  First(OnCall onCall): super(onCall);
+}
+
+class Rest extends VarargsFunction {
+  Rest(OnCall onCall): super(onCall);
 }

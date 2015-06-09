@@ -4,3 +4,7 @@
   // ;;;; ^(;;.*) -> // \1
   // ;; -----------------------------------------------------
 
+  // Minimal terminal with css
+  // http://codepen.io/nathansmonk/pen/FHbnC
+  // https://dartpad.dartlang.org/3b9835ad90e66bb006b8
+  // https://gist.github.com/3b9835ad90e66bb006b8

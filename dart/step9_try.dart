@@ -164,6 +164,42 @@ MalType EVAL(MalType sourceAst, Env env) {
       case 'macroexpand':
         argument1 = ast.nth(1);
         return macroExpand(argument1, env);
+      // TODO(adam): implement try
+      //'try*:        return ... // try/catch native and malval exceptions
+      case 'try*':
+        try {
+          return EVAL(ast.nth(1), env);
+        } catch (ex, st) {
+          if (ast.malTypes.length > 2) {
+            MalType exception;
+            argument2 = ast.nth(2);
+            MalType argument20 = (argument2 as MalList).nth(0);
+            if ((argument20 as MalSymbol).symbol == "catch*") {
+
+              // TODO(adam): implement MalException
+              if (ex is MalThrowException) {
+                exception = ex.malType;
+              } else {
+                exception = new MalString("${ex.toString()}: ${st.toString()}");
+              }
+              //  exception = (ex as MalException).getValue(); // TODO(adam): what is getValue?
+              //} else {
+              // exception = new MalString("${ex.toString()}: ${st.toString()}");
+              //}
+
+              var newBinds =  new MalList.fromList((argument2 as MalList).malTypes.sublist(1,2).toList());
+              Env newEnv = new Env(
+                  outer: env,
+                  binds: newBinds,
+                  exprs: new MalList.fromList([exception]));
+              return EVAL((argument2 as MalList).nth(2), newEnv);
+
+            }
+          }
+
+          throw ex;
+        }
+        break;
       case 'do':
       // 'do: return eval_ast(rest(ast), env)[-1]
       // * `do`: Evaluate the all the elements of the list using `eval_ast`

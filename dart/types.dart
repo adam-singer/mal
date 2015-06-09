@@ -23,6 +23,14 @@ class MalList extends MalType {
     return malTypes[index];
   }
 
+  MalList conjBANG(List args) {
+    args.forEach((arg) {
+      malTypes.add(arg);
+    });
+
+    return this;
+  }
+
   /**
    * rest: this function takes a list (or vector) as its argument and returns a new list containing all the elements
    * except the first.
@@ -50,6 +58,7 @@ class MalVector extends MalList {
 }
 
 class MalHashMap extends MalType {
+  // TODO(ADAM): Object should be MalType
   final Map<Object, MalType> malHashMap;
   MalHashMap(): malHashMap = new Map<Object, MalType>();
   MalHashMap.fromMalList(MalList malList): malHashMap = new Map<Object, MalType>() {
@@ -59,6 +68,33 @@ class MalHashMap extends MalType {
       // malHashMap[key.toString()] = val;
       malHashMap[key] = val;
     }
+  }
+
+  MalHashMap clone() {
+    MalList malList = new MalList();
+    malHashMap.forEach((k,v) => malList.malTypes.addAll([k,v]));
+    MalHashMap clonedMap = new MalHashMap.fromMalList(malList);
+    return clonedMap;
+  }
+
+
+  MalHashMap assocBang(MalList malList) {
+    for (int i = 0; i < malList.malTypes.length; i+=2) {
+      var key = malList.malTypes[i];
+      var value = malList.malTypes[i+1];
+      malHashMap[key] = value;
+    }
+
+    return this;
+  }
+
+  MalHashMap dissocBang(MalList malList) {
+    for (int i = 0; i < malList.malTypes.length; i++) {
+      var key = malList.malTypes[i];
+      malHashMap.remove(key);
+    }
+
+    return this;
   }
 
   @override
@@ -103,6 +139,7 @@ class MalSymbol extends MalType {
 }
 
 class MalKeyword extends MalType {
+  static final K = ":";
   final String keyword;
   MalKeyword(this.keyword);
 
@@ -139,6 +176,9 @@ class MalString extends MalType {
       return string.toString();
     }
   }
+
+  bool operator == (o) => o is MalString && o.string == string;
+  int get hashCode => string.hashCode;
 }
 
 class MalBoolean extends MalType {
@@ -294,4 +334,99 @@ class First extends VarargsFunction {
 
 class Rest extends VarargsFunction {
   Rest(OnCall onCall): super(onCall);
+}
+
+class MalThrow extends VarargsFunction {
+  MalThrow(OnCall onCall): super(onCall);
+}
+
+class IsNil extends VarargsFunction {
+  IsNil(OnCall onCall): super(onCall);
+}
+
+class IsTrue extends VarargsFunction {
+  IsTrue(OnCall onCall): super(onCall);
+}
+
+class IsFalse extends VarargsFunction {
+  IsFalse(OnCall onCall): super(onCall);
+}
+class MalSymbolCore extends VarargsFunction {
+  MalSymbolCore(OnCall onCall): super(onCall);
+}
+
+class IsMalSymbolCore extends VarargsFunction {
+  IsMalSymbolCore(OnCall onCall): super(onCall);
+}
+
+class Keyword extends VarargsFunction {
+  Keyword(OnCall onCall): super(onCall);
+}
+class IsKeyword extends VarargsFunction {
+  IsKeyword(OnCall onCall): super(onCall);
+}
+
+//class MalListCore extends VarargsFunction {
+//  MalListCore(OnCall onCall): super(onCall);
+//}
+//
+//class IsMalListCore extends VarargsFunction {
+//  IsMalListCore(OnCall onCall): super(onCall);
+//}
+
+class MalVectorCore extends VarargsFunction {
+  MalVectorCore(OnCall onCall): super(onCall);
+}
+
+class IsMalVectorCore extends VarargsFunction {
+  IsMalVectorCore(OnCall onCall): super(onCall);
+}
+
+class HashMapCore extends VarargsFunction {
+  HashMapCore(OnCall onCall): super(onCall);
+}
+
+class IsMapCore extends VarargsFunction {
+  IsMapCore(OnCall onCall): super(onCall);
+}
+
+class Assoc extends VarargsFunction {
+  Assoc(OnCall onCall): super(onCall);
+}
+
+class Dissoc extends VarargsFunction {
+  Dissoc(OnCall onCall): super(onCall);
+}
+
+class GetCore extends VarargsFunction {
+  GetCore(OnCall onCall): super(onCall);
+}
+
+class IsContains extends VarargsFunction {
+  IsContains(OnCall onCall): super(onCall);
+}
+
+class KeysCore extends VarargsFunction {
+  KeysCore(OnCall onCall): super(onCall);
+}
+
+class ValsCore extends VarargsFunction {
+  ValsCore(OnCall onCall): super(onCall);
+}
+
+class IsSequential extends VarargsFunction {
+  IsSequential(OnCall onCall): super(onCall);
+}
+
+class ApplyCore extends VarargsFunction {
+  ApplyCore(OnCall onCall): super(onCall);
+}
+
+class MapCore extends VarargsFunction {
+  MapCore(OnCall onCall): super(onCall);
+}
+
+class MalThrowException extends StateError {
+  MalType malType;
+  MalThrowException(this.malType, message) : super(message);
 }

@@ -228,36 +228,222 @@ Rest rest = new Rest((arguments) {
   return list.rest();
 });
 
+MalThrow malThrow = new MalThrow((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  throw new MalThrowException(argument0, argument0.toString());
+});
+
+IsNil isNil = new IsNil((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 == MAL_NIL ? MAL_TRUE : MAL_FALSE;
+});
+
+IsTrue isTrue = new IsTrue((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 == MAL_TRUE ? MAL_TRUE : MAL_FALSE;
+});
+
+IsFalse isFalse = new IsFalse((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 == MAL_FALSE ? MAL_TRUE : MAL_FALSE;
+});
+
+MalSymbolCore malSymbolCore = new MalSymbolCore((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return new MalSymbol(argument0.toString());
+});
+
+IsMalSymbolCore isMalSymbolCore = new IsMalSymbolCore((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 is MalSymbol ? MAL_TRUE : MAL_FALSE;
+});
+
+Keyword keyword = new Keyword((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+
+  if ((argument0 is MalString &&  (argument0.string[0] == MalKeyword.K)) || argument0 is MalKeyword) {
+    return new MalKeyword(argument0.string);
+  } else {
+    // TODO(adam): we could just do a toString and be done with it.
+    return new MalKeyword(MalKeyword.K + (argument0 as MalString).string);
+  }
+});
+
+IsKeyword isKeyword = new IsKeyword((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  if ((argument0 is MalString &&  (argument0.string[0] == MalKeyword.K)) || argument0 is MalKeyword) {
+    return MAL_TRUE;
+  } else {
+    return MAL_FALSE;
+  }
+});
+
+//MalListCore malListCore = new MalListCore((arguments) {
+//  throw new UnimplementedError();
+//});
+//
+//IsMalListCore isMalListCore = new IsMalListCore((arguments) {
+//  throw new UnimplementedError();
+//});
+
+MalVectorCore malVectorCore = new MalVectorCore((arguments) {
+  MalVector malVector = new MalVector();
+  malVector.malTypes.addAll(arguments);
+  return malVector;
+});
+
+IsMalVectorCore isMalVectorCore = new IsMalVectorCore((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 is MalVector ? MAL_TRUE : MAL_FALSE;
+});
+
+HashMapCore hashMapCore = new HashMapCore((arguments) {
+  // MalList argument0 = (arguments[0] as MalList);
+  return new MalHashMap.fromMalList(new MalList.fromList(arguments));
+});
+
+IsMapCore isMapCore = new IsMapCore((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 is MalHashMap ? MAL_TRUE : MAL_FALSE;
+});
+
+Assoc assoc = new Assoc((arguments) {
+  MalHashMap argument0 = (arguments[0] as MalHashMap);
+  Map<Object, MalType> malHashMap = argument0.malHashMap;
+  MalHashMap newMalHashMap = argument0.clone();
+  var subList = (arguments as List).sublist(1);
+  var mappedSubList = new MalList.fromList(subList);
+  return newMalHashMap.assocBang(mappedSubList);
+});
+
+Dissoc dissoc = new Dissoc((arguments) {
+  MalHashMap argument0 = (arguments[0] as MalHashMap);
+  Map<Object, MalType> malHashMap = argument0.malHashMap;
+  MalHashMap newMalHashMap = argument0.clone();
+  var subList = (arguments as List).sublist(1);
+  var mappedSubList = new MalList.fromList(subList);
+  return newMalHashMap.dissocBang(mappedSubList);
+});
+
+GetCore getCore = new GetCore((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  if (argument0 == MAL_NIL) {
+    return MAL_NIL;
+  } else {
+    MalHashMap malHashMap = argument0 as MalHashMap;
+    MalType key = arguments[1];
+
+    if (malHashMap.malHashMap.containsKey(key)) {
+      return malHashMap.malHashMap[key];
+    } else {
+      return MAL_NIL;
+    }
+  }
+});
+
+IsContains isContains = new IsContains((arguments) {
+  Map<Object, MalType> malHashMap = (arguments[0] as MalHashMap).malHashMap;
+  MalType key = arguments[1];
+  return malHashMap.containsKey(key) ? MAL_TRUE : MAL_FALSE;
+});
+
+KeysCore keysCore = new KeysCore((arguments) {
+  MalHashMap argument0 = (arguments[0] as MalHashMap);
+  Map<Object, MalType> malHashMap = argument0.malHashMap;
+  var keys = malHashMap.keys.toList();
+  MalList malKeysList = new MalList();
+  malKeysList.conjBANG(keys);
+  return malKeysList;
+});
+
+ValsCore valsCore = new ValsCore((arguments) {
+  MalHashMap argument0 = (arguments[0] as MalHashMap);
+  Map<Object, MalType> malHashMap = argument0.malHashMap;
+  List<MalType> values = malHashMap.values.toList();
+  MalList malValuesList = new MalList.fromList(values);
+  return malValuesList;
+});
+
+IsSequential isSequential = new IsSequential((arguments) {
+  MalType argument0 = (arguments[0] as MalType);
+  return argument0 is MalList ? MAL_TRUE : MAL_FALSE;
+});
+
+ApplyCore applyCore = new ApplyCore((arguments) {
+  VarargsFunction function = (arguments[0] as VarargsFunction);
+  var argumentsAsList = (arguments as List);
+  var argumentsLength = argumentsAsList.length;
+  List args = argumentsAsList.getRange(1, argumentsLength - 1).toList();
+  var lastArgumentAsMalList = argumentsAsList[argumentsLength - 1] as MalList;
+  args.addAll(lastArgumentAsMalList.malTypes);
+  return Function.apply(function, args);
+});
+
+MapCore mapCore = new MapCore((arguments) {
+  VarargsFunction function = (arguments[0] as VarargsFunction);
+  List srcList = (arguments[1] as MalList).malTypes;
+  List newList = new List<MalType>();
+  for (int i = 0; i < srcList.length; i++) {
+    var val = Function.apply(function, [srcList[i]]);
+    newList.add(val);
+  }
+
+  return new MalList.fromList(newList);
+});
+
 // core modules namespace
 Map<String, Object> ns = {
-    '=': isEqual,
-    'pr-str': prStr,
-    'str': str,
-    'prn': prn,
-    'println': printLn,
+    '=':            isEqual,
+    'throw':        malThrow,
 
-    'read-string': readString,
-    'slurp': slurp,
+    'nil?':         isNil,
+    'true?':        isTrue,
+    'false?':       isFalse,
+    'symbol':       malSymbolCore,
+    'symbol?':      isMalSymbolCore,
+    'keyword':      keyword,
+    'keyword?':     isKeyword,
 
-    '<': lessThanBinaryOperator,
-    '<=': lessThanEqualBinaryOperator,
-    '>': greaterThanBinaryOperator,
-    '>=': greaterThanEqualBinaryOperator,
-    '+': sumBinaryOperator,
-    '-': minusBinaryOperator,
-    '*': multiplyBinaryOperator,
-    '/': divideBinaryOperator,
+    'pr-str':       prStr,
+    'str':          str,
+    'prn':          prn,
+    'println':      printLn,
 
-    'list': toList,
-    'list?': isList,
+    'read-string':  readString,
+    'slurp':        slurp,
 
-    'cons': cons,
-    'concat': concat,
+    '<':            lessThanBinaryOperator,
+    '<=':           lessThanEqualBinaryOperator,
+    '>':            greaterThanBinaryOperator,
+    '>=':           greaterThanEqualBinaryOperator,
+    '+':            sumBinaryOperator,
+    '-':            minusBinaryOperator,
+    '*':            multiplyBinaryOperator,
+    '/':            divideBinaryOperator,
 
-    'nth': nth,
-    'first': first,
-    'rest': rest,
+    'list':         toList,
+    'list?':        isList,
+    'vector':       malVectorCore,
+    'vector?':      isMalVectorCore,
+    'hash-map':     hashMapCore,
+    'map?':         isMapCore,
+    'assoc':        assoc,
+    'dissoc':       dissoc,
+    'get':          getCore,
+    'contains?':    isContains,
+    'keys':         keysCore,
+    'vals':         valsCore,
 
-    'empty?': isEmpty,
-    'count': count
+    'sequential?':  isSequential,
+    'cons':         cons,
+    'concat':       concat,
+
+    'nth':          nth,
+    'first':        first,
+    'rest':         rest,
+
+    'empty?':       isEmpty,
+    'count':        count,
+    'apply':        applyCore,
+    'map':          mapCore
 };

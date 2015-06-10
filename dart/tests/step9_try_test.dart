@@ -1,4 +1,4 @@
-library step9_try;
+library step9_try_test;
 
 import "../step9_try.dart";
 import "test_helpers.dart";

@@ -1,4 +1,4 @@
-library step6_file;
+library step6_file_test;
 
 import "../step6_file.dart";
 import "test_helpers.dart";

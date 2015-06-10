@@ -1,4 +1,4 @@
-library step8_macros;
+library step8_macros_test;
 
 import "../step8_macros.dart";
 import "test_helpers.dart";

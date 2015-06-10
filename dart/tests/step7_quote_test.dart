@@ -1,4 +1,4 @@
-library step7_quote;
+library step7_quote_test;
 
 import "../step7_quote.dart";
 import "test_helpers.dart";

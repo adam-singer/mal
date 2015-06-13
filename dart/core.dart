@@ -391,6 +391,89 @@ MapCore mapCore = new MapCore((arguments) {
   return new MalList.fromList(newList);
 });
 
+ReadLine readLine = new ReadLine((arguments) {
+  var line = (arguments[0] as MalString).string;
+  if (line == null) {
+    return MAL_NIL;
+  } else {
+    return reader.read_str(line);
+  }
+});
+
+TimeMs timeMs = new TimeMs((arguments) {
+  DateTime now = new DateTime.now();
+  return now.millisecondsSinceEpoch;
+});
+
+Conj conj = new Conj((arguments) {
+  MalList srcList = (arguments[0] as MalList);
+  List<MalType> destList = new List<MalType>();
+  if (arguments[0] is MalVector) {
+    destList.addAll(srcList.malTypes);
+
+    for (int i = 1; i < (arguments as List).length; i++) {
+      destList.add(arguments[i]);
+    }
+
+    var malVector = new MalVector();
+    malVector.malTypes.addAll(destList);
+    return malVector;
+  } else {
+    destList.addAll(srcList.malTypes);
+
+    for (int i = 1; i < (arguments as List).length; i++) {
+      destList.insert(0, arguments[i]);
+    }
+
+    var malList = new MalList.fromList(destList);
+    return malList;
+  }
+});
+
+Meta meta = new Meta((arguments) {
+  MalType malType = arguments[0] as MalType;
+  return malType.meta;
+});
+
+WithMeta withMeta = new WithMeta((arguments) {
+  MalType malType = arguments[0] as MalType;
+  MalType malTypeCopy = malType.copy();
+  MalType meta = arguments[1] as MalType;
+  malTypeCopy.meta = meta;
+  return malTypeCopy;
+});
+
+Atom atom = new Atom((arguments) {
+  MalType malType = arguments[0] as MalType;
+  return new MalAtom(malType);
+});
+
+IsAtom isAtom = new IsAtom((arguments) {
+  return arguments[0] is MalAtom ? MAL_TRUE : MAL_FALSE;
+});
+
+Deref deref = new Deref((arguments) {
+  MalAtom malAtom = arguments[0] as MalAtom;
+  return malAtom.malType;
+});
+
+ResetBang resetBang = new ResetBang((arguments) {
+  MalAtom malAtom = arguments[0] as MalAtom;
+  MalType malType = arguments[1] as MalType;
+  malAtom.malType = malType;
+  return malAtom.malType;
+});
+
+SwapBang swapBang = new SwapBang((arguments) {
+  MalAtom atom = arguments[0] as MalAtom;
+  VarargsFunction f = arguments[1] as VarargsFunction;
+  MalList malList = new MalList();
+  malList.malTypes.add(atom.malType);
+  malList.malTypes.addAll((arguments as List).sublist(2));
+  atom.malType = Function.apply(f, malList.malTypes);
+  return atom.malType;
+});
+
 // core modules namespace
 Map<String, Object> ns = {
     '=':            isEqual,
@@ -410,6 +493,7 @@ Map<String, Object> ns = {
     'println':      printLn,
 
     'read-string':  readString,
+    'readline':     readLine,
     'slurp':        slurp,
 
     '<':            lessThanBinaryOperator,
@@ -420,6 +504,7 @@ Map<String, Object> ns = {
     '-':            minusBinaryOperator,
     '*':            multiplyBinaryOperator,
     '/':            divideBinaryOperator,
+    'time-ms':      timeMs,
 
     'list':         toList,
     'list?':        isList,
@@ -445,5 +530,14 @@ Map<String, Object> ns = {
     'empty?':       isEmpty,
     'count':        count,
     'apply':        applyCore,
-    'map':          mapCore
+    'map':          mapCore,
+    'conj':         conj,
+
+    'meta':         meta,
+    'with-meta':    withMeta,
+    'atom':         atom,
+    'atom?':        isAtom,
+    'deref':        deref,
+    'reset!':       resetBang,
+    'swap!':        swapBang
 };

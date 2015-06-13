@@ -182,10 +182,6 @@ MalType EVAL(MalType sourceAst, Env env) {
               } else {
                 exception = new MalString("${ex.toString()}: ${st.toString()}");
               }
-              //  exception = (ex as MalException).getValue(); // TODO(adam): what is getValue?
-              //} else {
-              // exception = new MalString("${ex.toString()}: ${st.toString()}");
-              //}
 
               var newBinds =  new MalList.fromList((argument2 as MalList).malTypes.sublist(1,2).toList());
               Env newEnv = new Env(
@@ -282,6 +278,7 @@ void init([List<String> args = const []]) {
   repl_env.set(new MalSymbol("*ARGV*"), new MalList.fromList(args.map((e) => new MalString(e)).toList()));
 
   // Define global function in language
+  rep("(def! *host-language* \"racket\")");
   rep("(def! not (fn* (a)(if a false true)))");
   rep('(def! load-file (fn* (f) (eval (read-string (str "(do" (slurp f) ")")))))');
   rep("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))");
@@ -298,6 +295,7 @@ void main(List<String> args) {
     exit(0);
   }
 
+  rep("(println (str \"Mal [\" *host-language* \"]\"))");
   while (true) {
     stdout.write("user> ");
     try {

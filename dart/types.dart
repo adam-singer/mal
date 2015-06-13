@@ -1,16 +1,30 @@
 library mal.types;
 
+import 'dart:mirrors';
+
 abstract class MalType extends Function {
+  MalType meta;
+  copy() { throw new Error(); }
   call() { throw new Error(); }
   @override
   String toString([bool print_readable = false]) { return "MalType"; }
 }
 
 class MalList extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   // TODO(adam): should create a varargs constructor for MalList and MalVector.
   final List<MalType> malTypes;
   MalList(): malTypes = new List<MalType>();
   MalList.fromList(this.malTypes);
+
+  MalList copy() {
+    MalList malList = new MalList.fromList(malTypes);
+    malList.meta = meta;
+    return malList;
+  }
+
   /**
    * nth: this function takes a list (or vector) and a number (index) as arguments, returns the element of the
    * list at the given index. If the index is out of range, this function raises an exception.
@@ -53,11 +67,21 @@ class MalList extends MalType {
 
 // TODO(ADAM): do not inherit from mallist, treat them as two seprate types and then fix the type checks.
 class MalVector extends MalList {
+  MalList copy() {
+    MalVector malVector = new MalVector();
+    malVector.malTypes.addAll(malTypes);
+    malVector.meta = meta;
+    return malVector;
+  }
+
   @override
   String toString([bool print_readable = false]) => "[${malTypes.join(' ')}]";
 }
 
 class MalHashMap extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   // TODO(ADAM): Object should be MalType
   final Map<Object, MalType> malHashMap;
   MalHashMap(): malHashMap = new Map<Object, MalType>();
@@ -70,10 +94,15 @@ class MalHashMap extends MalType {
     }
   }
 
+  MalHashMap copy() {
+    return clone();
+  }
+
   MalHashMap clone() {
     MalList malList = new MalList();
     malHashMap.forEach((k,v) => malList.malTypes.addAll([k,v]));
     MalHashMap clonedMap = new MalHashMap.fromMalList(malList);
+    clonedMap.meta = meta;
     return clonedMap;
   }
 
@@ -109,16 +138,30 @@ class MalHashMap extends MalType {
 }
 
 class MalNumber extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   final num number;
   MalNumber(this.number);
+
+  MalNumber copy() {
+    return this;
+  }
 
   @override
   String toString([bool print_readable = false]) => number.toString();
 }
 
 class MalSymbol extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   final String symbol;
   MalSymbol(this.symbol);
+
+  MalSymbol copy() {
+    return this;
+  }
 
   @override
   String toString([bool print_readable = false]) => symbol.toString();
@@ -139,9 +182,16 @@ class MalSymbol extends MalType {
 }
 
 class MalKeyword extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   static final K = ":";
   final String keyword;
   MalKeyword(this.keyword);
+
+  MalKeyword copy() {
+    return this;
+  }
 
   @override
   String toString([bool print_readable = false]) => keyword.toString();
@@ -164,8 +214,15 @@ class MalKeyword extends MalType {
 final BIND_SYMBOL = new MalSymbol("&");
 
 class MalString extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   final String string;
   MalString(this.string);
+
+  MalString copy() {
+    return this;
+  }
 
   @override
   String toString([bool print_readable = false]) {
@@ -182,12 +239,21 @@ class MalString extends MalType {
 }
 
 class MalBoolean extends MalType {
+
   final bool value;
   MalBoolean(this.value);
+
+  MalBoolean copy() {
+    return this;
+  }
+
   String toString([bool print_readable = false]) => "${this.value}";
 }
 
 class MalTrue extends MalBoolean {
+  @override
+  MalType meta = new MalNil();
+
   MalTrue(): super(true);
 }
 
@@ -196,19 +262,25 @@ class MalFalse extends MalBoolean {
 }
 
 class MalNil extends MalFalse {
-  MalNil(): super();
+  MalNil(): super() {
+    meta = this;
+  }
 
   @override
   String toString([bool print_readable = false]) => "nil";
 }
 
+// Need a better way to make this final.
 final MAL_NIL = new MalNil();
 final MAL_TRUE = new MalTrue();
 final MAL_FALSE = new MalFalse();
 
 typedef dynamic OnCall(List);
 
-abstract class VarargsFunction extends MalType {
+class VarargsFunction extends MalType {
+  @override
+  MalType meta = new MalNil();
+
   OnCall _onCall;
   var ast;
   var env;
@@ -226,6 +298,10 @@ abstract class VarargsFunction extends MalType {
 
   void setMacro() {
     macro = true;
+  }
+
+  VarargsFunction copy() {
+    return new VarargsFunction(this._onCall, ast: this.ast, env: this.env, fParams: this.fParams);
   }
 
   @override
@@ -426,7 +502,62 @@ class MapCore extends VarargsFunction {
   MapCore(OnCall onCall): super(onCall);
 }
 
+class ReadLine extends VarargsFunction {
+  ReadLine(OnCall onCall): super(onCall);
+}
+
+class TimeMs extends VarargsFunction {
+  TimeMs(OnCall onCall): super(onCall);
+}
+
+class Conj extends VarargsFunction {
+  Conj(OnCall onCall): super(onCall);
+}
+
+class Meta extends VarargsFunction {
+  Meta(OnCall onCall): super(onCall);
+}
+
+class WithMeta extends VarargsFunction {
+  WithMeta(OnCall onCall): super(onCall);
+}
+
+class Atom extends VarargsFunction {
+  Atom(OnCall onCall): super(onCall);
+}
+
+class IsAtom extends VarargsFunction {
+  IsAtom(OnCall onCall): super(onCall);
+}
+
+class Deref extends VarargsFunction {
+  Deref(OnCall onCall): super(onCall);
+}
+
+class ResetBang extends VarargsFunction {
+  ResetBang(OnCall onCall): super(onCall);
+}
+
+class SwapBang extends VarargsFunction {
+  SwapBang(OnCall onCall): super(onCall);
+}
+
 class MalThrowException extends StateError {
   MalType malType;
   MalThrowException(this.malType, message) : super(message);
+}
+
+class MalAtom extends MalType {
+  @override
+  MalType meta = new MalNil();
+
+  MalType malType;
+  MalAtom(this.malType);
+
+  copy() {
+    return new MalAtom(this.malType);
+  }
+
+  @override
+  String toString([bool print_readable = false]) => "(atom ${malType.toString(print_readable)})";
 }
